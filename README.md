@@ -50,6 +50,10 @@ Official implementation for
       
 </div>
 
+
+## 🚀 Codabench 🚀
+🎉 We release a Codabench [here](https://www.codabench.org/competitions/5712/). 🎮 Join the competition 🏁
+
 ## 📊 Download
 The 3DSES dataset can be accessed from our Zenodo repository: [3DSES on Zenodo](https://zenodo.org/records/13323342)
 
