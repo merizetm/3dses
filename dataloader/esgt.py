@@ -1,3 +1,9 @@
+# ***********************************************************************************************************************************************
+# Code written by Maxime Mérizette (phd student), inspired by code from Guocheng Qian & code from Swin3D author's :
+# - Voxelisation function from: https://github.com/guochengqian/openpoints/blob/baeca5e319aa2e756d179e494469eb7f5ffd29f0/dataset/data_util.py
+# - Dataset structure from: https://github.com/Yukichiii/Swin3D_Task/blob/main/SemanticSeg/datasets/s3dis.py
+# ***********************************************************************************************************************************************
+
 import os
 import numpy as np
 import torch
@@ -41,6 +47,16 @@ def ravel_hash_vec(arr):
 
 
 def voxelize(coord, voxel_size=0.05, hash_type="fnv", mode=0):
+    '''
+        Function dedicated to create voxel from point clouds
+        In:
+            - coord: XYZ coordinantes of point cloud
+            - voxel_size: the size of each voxel
+            - hash_type: type of hash that's will be used to create voxel
+            - mode: int value
+        Out:
+            - idx: the index of points
+    '''
     discrete_coord = np.floor(coord / np.array(voxel_size))
     if hash_type == "ravel":
         key = ravel_hash_vec(discrete_coord)
@@ -60,16 +76,6 @@ def voxelize(coord, voxel_size=0.05, hash_type="fnv", mode=0):
         return idx_unique
     else:  # val mode
         return idx_sort, count
-
-    """
-    #_, idx = np.unique(key, return_index=True)
-    #return idx
-
-    idx_sort = np.argsort(key)
-    key_sort = key[idx_sort]
-    _, idx_start, count = np.unique(key_sort, return_counts=True, return_index=True)
-    idx_list = np.split(idx_sort, idx_start[1:])
-    return idx_list"""
 
 def voxelize_and_inverse(coord, hash_type="fnv", mode=0):
     if hash_type == "ravel":
@@ -107,6 +113,22 @@ def data_prepare_3dses(
     transform=None,
     shuffle_index=False,
 ):
+    '''
+        Function dedicated to prepare point cloud to validation step
+        In:
+            -coord: XYZ coordinates
+            -feat: Features for each point (RGB, intensity or others)
+            -label: Label for each point
+            -split: String specifying the data splitting
+            -voxel_size: The size of voxel
+            -voxel_max: The maximum number of voxels to control memory usage.
+            -transform: Boolean indicating whether a transformation needs to be applied to the data.
+            -shuffled_index: Boolean indicating whether the data needs to be rearranged.
+        Out:
+            -coord: XYZ coordinates
+            -feat: Features for each point (RGB, intensity or others)
+            -label: Label for each point
+    '''
     if transform:
         color = feat[:, 0:3]
         coord, color = transform(coord, color)
@@ -147,6 +169,9 @@ def data_prepare_3dses_point(
     transform=None,
     shuffle_index=False,
 ):
+    '''
+        Same as previous function
+    '''
     if transform:
         color = feat[:, 0:3]
         coord, color = transform(coord, color)
@@ -173,6 +198,22 @@ def data_prepare_3dses_point(
 
 
 class ESGT(Dataset):
+    '''
+      Class to load and prepare 3DSES point clouds for Swin3D - designed for training
+      In:
+        - split: String specifying the data splitting
+        - data_root: The directory of 3DSES point clouds
+        - test_area: The name of validation point clouds
+        - fea_channels: string indicating whether additional features like Intensity should be loaded and whether Real or Pseudo labels should be imported.
+            * fea_channels='intensity'                      : RGB & Intensity & Pseudo labels
+            * fea_channels='intensity,manual_label'         : RGB & Intensity & Pseudo labels
+            * fea_channels='manual_label'                   : RGB & Real labels
+            * fea_channels=''                               : RGB & Pseudo labels
+      Out:
+        - coord: XYZ coordinates
+        - feat: Features of point cloud
+        - label: Label for each point
+    '''
     def __init__(
         self,
         split="train",
@@ -184,7 +225,7 @@ class ESGT(Dataset):
         shuffle_index=False,
         loop=1,
         vote_num=1,
-        fea_channels=[3,4,5],feat_transform=None, probability=0.2,
+        fea_channels=[3,4,5]
     ):
         super().__init__()
         (
@@ -194,8 +235,8 @@ class ESGT(Dataset):
             self.voxel_max,
             self.shuffle_index,
             self.loop,
-            self.fea_channels,self.feat_transform, self.probability,
-        ) = (split, voxel_size, transform, voxel_max, shuffle_index, loop, fea_channels,feat_transform,probability)
+            self.fea_channels
+        ) = (split, voxel_size, transform, voxel_max, shuffle_index, loop,fea_channels)
         data_list = sorted(os.listdir(data_root))
 
         self.test_area = ['S{}'.format(x) for x in test_area]
@@ -221,17 +262,16 @@ class ESGT(Dataset):
 
         item = self.data_list[data_idx]
         data_path = os.path.join(self.data_root, item + ".npy")
-        data = np.load(data_path)
+        data = np.load(data_path)   # Load point cloud (stored as npy file)
 
-        if 'intensity' in self.fea_channels : # Load RGB + Intensity
+        if 'intensity' in self.fea_channels : # Store coord (XYZ), feat (RGB + Intensity) and auto label
             coord, feat, label = data[:, 0:3], data[:, 3:7], data[:, -1]
 
-        else : # Load only RGB
+        else : # Store coord (XYZ), feat (RGB) and auto label
             coord, feat, label = data[:, 0:3], data[:, 3:6], data[:, -1]
 
-        # Add an option to differency manual and auto labels -!
+        # Add an option to differentiate Manual and Auto labels.
         if 'manuallabel' in self.fea_channels :
-            print('manual label')
             label = data[:, -2]
             
         feat[:, 0:3] = feat[:, 0:3] / 127.5 - 1
@@ -245,7 +285,6 @@ class ESGT(Dataset):
             self.transform,
             self.shuffle_index,
         )
-        print(coord, coord.shape) ; print(feat, feat.shape) ; print(label, label.shape)
         return coord, feat, label
 
     def __len__(self):
@@ -253,19 +292,35 @@ class ESGT(Dataset):
 
 
 class ESGT_Point(ESGT):
+    '''
+      Class to load and prepare 3DSES point clouds for Swin3D - dedicated to validation & test
+      In:
+        - split: String specifying the data splitting
+        - data_root: The directory of 3DSES point clouds
+        - test_area: The name of validation point clouds
+        - fea_channels: string indicating whether additional features like Intensity should be loaded and whether Real or Pseudo labels should be imported.
+            * fea_channels='intensity'                      : RGB & Intensity & Pseudo labels
+            * fea_channels='intensity,manual_label'         : RGB & Intensity & Pseudo labels
+            * fea_channels='manual_label'                   : RGB & Real labels
+            * fea_channels=''                               : RGB & Pseudo labels
+      Out:
+        - coord: XYZ coordinates
+        - feat: Features of point cloud
+        - label: Label for each point
+    '''
     def __getitem__(self, idx):
         data_idx = self.data_idx[idx % len(self.data_idx)]
 
         item = self.data_list[data_idx]
         data_path = os.path.join(self.data_root, item + ".npy")
-        data = np.load(data_path)
+        data = np.load(data_path) # Load point cloud (stored as npy file)
 
-        if 'intensity' in self.fea_channels : # Load RGB + Intensity
+        if 'intensity' in self.fea_channels : # Store coord (XYZ), feat (RGB + Intensity) and auto label
             coord, feat, label = data[:, 0:3], data[:, 3:7], data[:, -1]
-        else : # Load only RGB
+        else : # Store coord (XYZ), feat (RGB) and auto label
             coord, feat, label = data[:, 0:3], data[:, 3:6], data[:, -1]
 
-        # Add an option to differency manual and auto labels
+        # Add an option to differentiate Manual and Auto labels.
         if 'manuallabel' in self.fea_channels :
             label = data[:, -2]
 

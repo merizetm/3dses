@@ -39,7 +39,6 @@ Official implementation for
 
 
 <div align="center">
-
 |                 ✨ 3DSES features ✨                 |
 |:----------------------------------------------------:|
 |                    🏗️ **3D model**                   |
@@ -47,3 +46,9 @@ Official implementation for
 |           ↗️ **Extreme point clouds density**            |
 |               🎨 **Color information**               |
 </div>
+
+## 📊 Download
+The 3DSES dataset can be accessed from our Zenodo repository: [3DSES on Zenodo](https://zenodo.org/records/13323342)
+
+## 📈 Dataloader & Notebook
+We provide a Jupyter Notebook with an example of loading a batch for our dataset [here](https://github.com/merizetm/3dses/tree/main/notebook). We also provide a Torch DataLoader [here](https://github.com/merizetm/3dses/tree/main/dataloader).
