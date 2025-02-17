@@ -13,7 +13,7 @@ Official implementation for
 <br>
 [![arXiv](https://img.shields.io/badge/arxiv-2306.08045-b31b1b.svg)](https://arxiv.org/abs/2501.17534)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13323342.svg)](https://doi.org/10.5281/zenodo.13323342)
-[![Project page](https://img.shields.io/badge/Codabench-8A2BE2)](https://www.codabench.org/competitions/5710/)
+[![Project page](https://img.shields.io/badge/Codabench-8A2BE2)](https://www.codabench.org/competitions/5712/)
 <br>
 </div>
 
