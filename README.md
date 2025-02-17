@@ -13,7 +13,7 @@ Official implementation for
 <br>
 [![arXiv](https://img.shields.io/badge/arxiv-2306.08045-b31b1b.svg)](https://arxiv.org/abs/2501.17534)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13323342.svg)](https://doi.org/10.5281/zenodo.13323342)
-[![Project page](https://img.shields.io/badge/Codabench-8A2BE2)](https://www.codabench.org/competitions/5458/)
+[![Project page](https://img.shields.io/badge/Codabench-8A2BE2)](https://www.codabench.org/competitions/5710/)
 <br>
 </div>
 
@@ -38,13 +38,16 @@ Official implementation for
 **3DSES (3D Segmentation of ESGT point clouds)** is a new dataset of indoor dense TLS colorized point clouds covering 427 m² of an engineering school. 3DSES has a unique double annotation format: semantic labels annotated at the point level alongside a full 3D CAD model of the building
 
 
+
 <div align="center">
+      
 |                 ✨ 3DSES features ✨                 |
 |:----------------------------------------------------:|
 |                    🏗️ **3D model**                   |
 |                📶 **Lidar intensity**                |
 |           ↗️ **Extreme point clouds density**            |
 |               🎨 **Color information**               |
+      
 </div>
 
 ## 📊 Download
